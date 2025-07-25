@@ -61,6 +61,7 @@ struct ContentView: View {
                 }
 
                 HStack(spacing: 10) {
+                    CalculatorButton(label: "⌫", action: backspace)
                     CalculatorButton(label: "0", action: { appendDigit("0") })
                         .frame(maxWidth: .infinity)
                     CalculatorButton(label: ".", action: appendDecimal)
@@ -72,7 +73,41 @@ struct ContentView: View {
     }
 
     // MARK: - Actions
+    
+    private func backspace() {
+        guard !displayExpression.isEmpty else { return }
 
+        // Safely remove last character
+        displayExpression.removeLast()
+
+        // Remove any trailing whitespace
+        while displayExpression.last == " " {
+            displayExpression.removeLast()
+        }
+
+        // If empty after removing, reset everything
+        guard !displayExpression.isEmpty else {
+            display = "0"
+            isNewNumber = true
+            return
+        }
+
+        // Get the last number token (if available)
+        let tokens = displayExpression.components(separatedBy: .whitespaces)
+        if let last = tokens.last, Double(last) != nil {
+            display = last
+            isNewNumber = false
+        } else {
+            display = "0"
+            isNewNumber = true
+        }
+
+        // Only evaluate if the expression is safe
+        if let lastChar = displayExpression.last, !"+-×÷*/".contains(lastChar) {
+            evaluateExpression()
+        }
+    }
+    
     private func appendDigit(_ digit: String) {
         if isNewNumber {
             display = digit
@@ -81,7 +116,9 @@ struct ContentView: View {
             display += digit
         }
         displayExpression += digit
+        evaluateExpression()
     }
+
 
     private func appendDecimal() {
         if isNewNumber {
@@ -92,7 +129,9 @@ struct ContentView: View {
             display += "."
             displayExpression += "."
         }
+        evaluateExpression()
     }
+
 
     private func clear() {
         display = "0"
@@ -118,39 +157,54 @@ struct ContentView: View {
     }
 
     private func selectOperation(_ operation: Operation) {
-        if let value = Double(display) {
-            firstOperand = value
-            currentOperation = operation
-            isNewNumber = true
+        if isNewNumber {
+            if displayExpression.last.map({ "+-×÷".contains($0) }) == true {
+                displayExpression.removeLast()
+            }
+        } else {
             displayExpression += operationSymbol(for: operation)
+            isNewNumber = true
+        }
+        evaluateExpression()
+    }
+
+    
+    private func evaluateExpression() {
+        let trimmed = displayExpression.trimmingCharacters(in: .whitespaces)
+        
+        // Avoid evaluation if expression ends with an operator
+        if let last = trimmed.last, "+-×÷*/".contains(last) {
+            return
+        }
+
+        // Force decimal numbers (e.g., 5 → 5.0)
+        let tokens = trimmed.components(separatedBy: .whitespaces)
+        let floatTokens = tokens.map { token -> String in
+            if let _ = Double(token) {
+                return token.contains(".") ? token : "\(token).0"
+            } else {
+                return token
+            }
+        }
+
+        let mathExpression = floatTokens.joined(separator: " ")
+            .replacingOccurrences(of: "×", with: "*")
+            .replacingOccurrences(of: "÷", with: "/")
+
+        let expression = NSExpression(format: mathExpression)
+        if let result = expression.expressionValue(with: nil, context: nil) as? NSNumber {
+            display = String(format: "%.6f", result.doubleValue).trimmedTrailingZeros()
+        } else {
+            display = "Error"
         }
     }
 
-    private func calculateResult() {
-        if let value = Double(display), let operation = currentOperation {
-            var result: Double?
-            
-            switch operation {
-            case .addition:
-                result = firstOperand + value
-            case .subtraction:
-                result = firstOperand - value
-            case .multiplication:
-                result = firstOperand * value
-            case .division:
-                result = value != 0 ? firstOperand / value : nil
-            }
 
-            if let result = result {
-                display = String(result)
-                displayExpression += " = \(result)"
-            } else {
-                display = "Error"
-                displayExpression = "Error"
-            }
-            currentOperation = nil
-            isNewNumber = true
-        }
+
+    private func calculateResult() {
+        evaluateExpression()
+        displayExpression = display
+        isNewNumber = true
     }
 
     private func operationSymbol(for operation: Operation) -> String {
@@ -181,4 +235,11 @@ struct CalculatorButton: View {
 
 #Preview {
     ContentView()
+}
+
+extension String {
+    func trimmedTrailingZeros() -> String {
+        self.replacingOccurrences(of: #"(\.\d*?[1-9])0+$"#, with: "$1", options: .regularExpression)
+            .replacingOccurrences(of: #"\.0+$"#, with: "", options: .regularExpression)
+    }
 }
