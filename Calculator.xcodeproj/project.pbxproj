@@ -35,14 +35,14 @@
 			path = Calculator;
 			sourceTree = "<group>";
 		};
-		15BEEA0C2CE2141C00975A02 /* First AppTests */ = {
+		15BEEA0C2CE2141C00975A02 /* CalculatorTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "First AppTests";
+			path = CalculatorTests;
 			sourceTree = "<group>";
 		};
-		15BEEA162CE2141C00975A02 /* First AppUITests */ = {
+		15BEEA162CE2141C00975A02 /* CalculatorUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "First AppUITests";
+			path = CalculatorUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -76,8 +76,8 @@
 			isa = PBXGroup;
 			children = (
 				15BEE9FB2CE2141B00975A02 /* Calculator */,
-				15BEEA0C2CE2141C00975A02 /* First AppTests */,
-				15BEEA162CE2141C00975A02 /* First AppUITests */,
+				15BEEA0C2CE2141C00975A02 /* CalculatorTests */,
+				15BEEA162CE2141C00975A02 /* CalculatorUITests */,
 				15BEE9FA2CE2141B00975A02 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -131,7 +131,7 @@
 				15BEEA0B2CE2141C00975A02 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				15BEEA0C2CE2141C00975A02 /* First AppTests */,
+				15BEEA0C2CE2141C00975A02 /* CalculatorTests */,
 			);
 			name = CalculatorTests;
 			packageProductDependencies = (
@@ -154,7 +154,7 @@
 				15BEEA152CE2141C00975A02 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				15BEEA162CE2141C00975A02 /* First AppUITests */,
+				15BEEA162CE2141C00975A02 /* CalculatorUITests */,
 			);
 			name = CalculatorUITests;
 			packageProductDependencies = (
